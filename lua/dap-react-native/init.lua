@@ -5,13 +5,6 @@ local DEFAULT_PORT = 8081
 local DEFAULT_REACT_NATIVE_TYPE = "reactnativedirect"
 local DEFAULT_ADAPTER = "pwa-node"
 
-local DEFAULT_FILETYPES = {
-	"javascript",
-	"typescript",
-	"javascriptreact",
-	"typescriptreact",
-}
-
 local DEFAULT_SKIP_FILES = {
 	"<node_internals>/**",
 	"node_modules/**",
@@ -78,7 +71,6 @@ local function default_setup_options()
 	return {
 		react_native_type = DEFAULT_REACT_NATIVE_TYPE,
 		adapter = DEFAULT_ADAPTER,
-		filetypes = DEFAULT_FILETYPES,
 		metro_host = DEFAULT_HOST,
 		metro_port = DEFAULT_PORT,
 		source_maps = true,
@@ -644,11 +636,6 @@ end
 function M.setup_launch_config_rewriter(opts)
 	opts = normalize_options(opts)
 	local dap = require("dap")
-
-	local ok, vscode = pcall(require, "dap.ext.vscode")
-	if ok and type(vscode.type_to_filetypes) == "table" and type(opts.filetypes) == "table" then
-		vscode.type_to_filetypes[opts.react_native_type] = opts.filetypes
-	end
 
 	dap.listeners.on_config["dap_react_native"] = function(config)
 		if config.type == opts.react_native_type then

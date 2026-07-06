@@ -77,13 +77,6 @@ require("dap-react-native").setup({
   react_native_type = "reactnativedirect",
   adapter = "pwa-node",
 
-  filetypes = {
-    "javascript",
-    "typescript",
-    "javascriptreact",
-    "typescriptreact",
-  },
-
   metro_host = "127.0.0.1",
   metro_port = 8081,
 
