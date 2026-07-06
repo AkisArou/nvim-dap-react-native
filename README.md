@@ -117,11 +117,3 @@ end
 The same JSON shape can live in `.vscode/launch.json` if you prefer to reuse VS Code-style project config.
 
 `request = "launch"` is intentionally not implemented yet. Start Metro and the app yourself, then attach.
-
-You can also attach directly from a keymap:
-
-```lua
-vim.keymap.set("n", "<leader>dn", function()
-  require("dap-react-native").attach()
-end)
-```

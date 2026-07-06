@@ -707,19 +707,4 @@ function M.create_adapter(base_adapter)
 	end
 end
 
-function M.attach(config)
-	ensure_hooks()
-
-	local dap = require("dap")
-
-	config = vim.tbl_deep_extend("force", {
-		type = "reactnativedirect",
-		request = "attach",
-		name = "Attach React Native Hermes",
-		cwd = vim.fn.getcwd(),
-	}, config or {})
-
-	dap.run(M.configure_launch_config(config))
-end
-
 return M
