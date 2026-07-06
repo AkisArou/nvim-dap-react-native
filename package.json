@@ -1,0 +1,18 @@
+{
+  "name": "nvim-dap-react-native",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "React Native Hermes CDP bridge for nvim-dap",
+  "license": "MIT",
+  "scripts": {
+    "check": "node --check scripts/react-native-hermes-cdp-proxy.js"
+  },
+  "dependencies": {
+    "vscode-cdp-proxy": "^0.2.1",
+    "ws": "^8.18.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
