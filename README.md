@@ -37,7 +37,7 @@ Related VS Code React Native Tools docs:
 ## Requirements
 
 - Neovim with `nvim-dap`
-- `vscode-js-debug` configured as `pwa-node`
+- [`vscode-js-debug` configured as `pwa-node`](https://codeberg.org/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#javascript)
 - Node.js 20+
 
 Install the Node proxy dependencies once. Plugin managers should run `npm ci` after installing or updating the plugin.
