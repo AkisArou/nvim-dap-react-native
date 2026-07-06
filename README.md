@@ -15,6 +15,13 @@ This plugin handles VS Code-style `reactnativedirect` attach configurations from
   "request": "attach",
   "name": "Attach React Native Hermes",
   "cwd": "${workspaceFolder}/apps/mobile",
+  "address": "127.0.0.1",
+  "port": 8081,
+  "sourceMaps": true,
+  "sourceMapPathOverrides": {
+    "/[metro-project]/*": "${workspaceFolder}/apps/mobile/*",
+  },
+  "skipFiles": ["<node_internals>/**", "node_modules/**"],
 }
 ```
 
@@ -77,18 +84,8 @@ Use a React Native Tools-style `reactnativedirect` attach configuration:
 {
   "type": "reactnativedirect",
   "request": "attach",
-  "name": "PRM: Attach Agent",
-  "cwd": "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
-  "address": "127.0.0.1",
-  "port": 8081,
-  "sourceMaps": true,
-  "sourceMapPathOverrides": {
-    "/[metro-project]/*": "${workspaceFolder}/apps/client/assistant-prm-airport/agent/*",
-  },
-  "skipFiles": [
-    "<node_internals>/**",
-    "node_modules/**",
-  ],
+  "name": "React Native: Attach Hermes",
+  "cwd": "${workspaceFolder}/apps/mobile",
 }
 ```
 
@@ -110,17 +107,7 @@ for _, language in ipairs({
     type = "reactnativedirect",
     request = "attach",
     name = "React Native: Attach Hermes",
-    cwd = "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
-    address = "127.0.0.1",
-    port = 8081,
-    sourceMaps = true,
-    sourceMapPathOverrides = {
-      ["/[metro-project]/*"] = "${workspaceFolder}/apps/client/assistant-prm-airport/agent/*",
-    },
-    skipFiles = {
-      "<node_internals>/**",
-      "node_modules/**",
-    },
+    cwd = "${workspaceFolder}/apps/mobile",
   })
 end
 ```
