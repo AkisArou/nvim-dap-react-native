@@ -7,7 +7,7 @@ React Native DevTools is the official supported debugger for React Native. This 
 ## What It Does
 
 This plugin handles VS Code-style `reactnativedirect` attach configurations from
-`.vscode/launch.json` or `dap.configurations`:
+`dap.configurations` or `.vscode/launch.json`:
 
 ```jsonc
 {
@@ -74,24 +74,11 @@ Most users only need:
 require("dap-react-native").setup()
 ```
 
-Project-specific values belong in `launch.json` or `dap.configurations`. The plugin also reads `REACT_NATIVE_PACKAGER_HOSTNAME` and `RCT_METRO_PORT` when `address` or `port` are not set.
+Project-specific values belong in `dap.configurations` or `launch.json`. The plugin also reads `REACT_NATIVE_PACKAGER_HOSTNAME` and `RCT_METRO_PORT` when `address` or `port` are not set.
 
 ## Usage
 
 Use a React Native Tools-style `reactnativedirect` attach configuration:
-
-```jsonc
-{
-  "type": "reactnativedirect",
-  "request": "attach",
-  "name": "React Native: Attach Hermes",
-  "cwd": "${workspaceFolder}/apps/mobile",
-}
-```
-
-`request = "launch"` is intentionally not implemented yet. Start Metro and the app yourself, then attach.
-
-The same config can live directly in Neovim:
 
 ```lua
 local dap = require("dap")
@@ -111,6 +98,19 @@ for _, language in ipairs({
   })
 end
 ```
+
+The same config can live in `.vscode/launch.json` if you prefer to reuse VS Code-style project config:
+
+```jsonc
+{
+  "type": "reactnativedirect",
+  "request": "attach",
+  "name": "React Native: Attach Hermes",
+  "cwd": "${workspaceFolder}/apps/mobile",
+}
+```
+
+`request = "launch"` is intentionally not implemented yet. Start Metro and the app yourself, then attach.
 
 You can also attach directly from a keymap:
 
