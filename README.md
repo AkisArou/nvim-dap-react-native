@@ -81,21 +81,11 @@ With lazy.nvim:
 }
 ```
 
-## Setup
-
-Configure `pwa-node` in your normal DAP setup before using this plugin.
-
-Most users only need:
-
-```lua
-require("dap-react-native").setup()
-```
-
-Project-specific values belong in `dap.configurations` or `launch.json`. The plugin also reads `REACT_NATIVE_PACKAGER_HOSTNAME` and `RCT_METRO_PORT` when `address` or `port` are not set.
-
 ## Usage
 
 Use a React Native Tools-style `reactnativedirect` attach configuration:
+
+Project-specific values belong in `dap.configurations` or `launch.json`. The plugin also reads `REACT_NATIVE_PACKAGER_HOSTNAME` and `RCT_METRO_PORT` when `address` or `port` are not set.
 
 ```lua
 local dap = require("dap")
