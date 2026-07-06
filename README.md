@@ -29,6 +29,11 @@ Supported attach fields:
 
 Defaults are `name = "Attach React Native Hermes"`, `cwd = "${workspaceFolder}"`, `address = "127.0.0.1"`, `port = 8081`, and `sourceMaps = true`. `sourceMapPathOverrides` and `skipFiles` are optional.
 
+Related VS Code React Native Tools docs:
+
+- [Hermes engine and direct debugging](https://github.com/microsoft/vscode-react-native#hermes-engine-and-direct-debugging-recommended)
+- [Debugger configuration properties](https://github.com/microsoft/vscode-react-native#debugger-configuration-properties)
+
 ## Requirements
 
 - Neovim with `nvim-dap`
