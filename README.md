@@ -61,29 +61,17 @@ With lazy.nvim:
 
 Configure `pwa-node` in your normal DAP setup before using this plugin. `pwa-chrome` is not required for React Native.
 
-Common options:
+Most users only need:
 
 ```lua
-require("dap-react-native").setup({
-  react_native_type = "reactnativedirect",
-  adapter = "pwa-node",
-
-  metro_host = "127.0.0.1",
-  metro_port = 8081,
-
-  source_maps = true,
-  skip_files = {
-    "<node_internals>/**",
-    "node_modules/**",
-  },
-})
+require("dap-react-native").setup()
 ```
 
-Per-config `address` / `port` override `metro_host` / `metro_port`. The plugin also reads `REACT_NATIVE_PACKAGER_HOSTNAME` and `RCT_METRO_PORT`.
+Project-specific values belong in `launch.json` or `dap.configurations`. The plugin also reads `REACT_NATIVE_PACKAGER_HOSTNAME` and `RCT_METRO_PORT` when `address` or `port` are not set.
 
 ## Usage
 
-Current `nvim-dap` reads `.vscode/launch.json` automatically; `dap.ext.vscode.load_launchjs()` and `type_to_filetypes` mappings are not needed.
+Use a React Native Tools-style `reactnativedirect` attach configuration:
 
 ```jsonc
 {
@@ -91,10 +79,51 @@ Current `nvim-dap` reads `.vscode/launch.json` automatically; `dap.ext.vscode.lo
   "request": "attach",
   "name": "PRM: Attach Agent",
   "cwd": "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
+  "address": "127.0.0.1",
+  "port": 8081,
+  "sourceMaps": true,
+  "sourceMapPathOverrides": {
+    "/[metro-project]/*": "${workspaceFolder}/apps/client/assistant-prm-airport/agent/*",
+  },
+  "skipFiles": [
+    "<node_internals>/**",
+    "node_modules/**",
+  ],
 }
 ```
 
 `request = "launch"` is intentionally not implemented yet. Start Metro and the app yourself, then attach.
+
+The same config can live directly in Neovim:
+
+```lua
+local dap = require("dap")
+
+for _, language in ipairs({
+  "javascript",
+  "javascriptreact",
+  "typescript",
+  "typescriptreact",
+}) do
+  dap.configurations[language] = dap.configurations[language] or {}
+  table.insert(dap.configurations[language], {
+    type = "reactnativedirect",
+    request = "attach",
+    name = "React Native: Attach Hermes",
+    cwd = "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
+    address = "127.0.0.1",
+    port = 8081,
+    sourceMaps = true,
+    sourceMapPathOverrides = {
+      ["/[metro-project]/*"] = "${workspaceFolder}/apps/client/assistant-prm-airport/agent/*",
+    },
+    skipFiles = {
+      "<node_internals>/**",
+      "node_modules/**",
+    },
+  })
+end
+```
 
 You can also attach directly from a keymap:
 

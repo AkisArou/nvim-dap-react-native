@@ -71,11 +71,6 @@ local function default_setup_options()
 	return {
 		react_native_type = DEFAULT_REACT_NATIVE_TYPE,
 		adapter = DEFAULT_ADAPTER,
-		metro_host = DEFAULT_HOST,
-		metro_port = DEFAULT_PORT,
-		source_maps = true,
-		skip_files = DEFAULT_SKIP_FILES,
-		resolve_source_map_locations = DEFAULT_RESOLVE_SOURCE_MAP_LOCATIONS,
 		setup_pause_stop_fix = true,
 		proxy = {
 			host = "127.0.0.1",
@@ -120,12 +115,12 @@ local function get_option(config, opts, ...)
 	end
 end
 
-local function metro_endpoint(config, opts)
+local function metro_endpoint(config)
 	local env_host = os.getenv("REACT_NATIVE_PACKAGER_HOSTNAME")
 	local env_port = os.getenv("RCT_METRO_PORT")
 
-	local host = get_option(config, opts, "metro_host", "metroHost", "host", "address") or env_host or DEFAULT_HOST
-	local port = get_option(config, opts, "metro_port", "metroPort", "port") or env_port or DEFAULT_PORT
+	local host = get_option(config, nil, "address", "host") or env_host or DEFAULT_HOST
+	local port = get_option(config, nil, "port") or env_port or DEFAULT_PORT
 
 	return tostring(host), tostring(port)
 end
@@ -393,7 +388,7 @@ end
 local function start_proxy(config, opts)
 	ensure_proxy_runtime(opts)
 
-	local host, metro_port = metro_endpoint(config, opts)
+	local host, metro_port = metro_endpoint(config)
 	local target = M.pick_target(M.find_hermes_targets(config, opts))
 	local proxy_host = opts.proxy.host or "127.0.0.1"
 	local node_command = opts.proxy.node_command or "node"
@@ -618,12 +613,12 @@ function M.configure_launch_config(config, opts)
 	item.name = item.name or "Attach React Native Hermes"
 	item.cwd = cwd
 	item.continueOnAttach = item.continueOnAttach ~= false
-	item.sourceMaps = item.sourceMaps ~= false and opts.source_maps ~= false
+	item.sourceMaps = item.sourceMaps ~= false
 	item.pauseForSourceMap = item.pauseForSourceMap ~= false
 	item.rootPath = item.rootPath or "${workspaceFolder}"
 	item.sourceMapPathOverrides = merge_source_map_overrides(item, cwd)
-	item.resolveSourceMapLocations = item.resolveSourceMapLocations or opts.resolve_source_map_locations
-	item.skipFiles = item.skipFiles or opts.skip_files
+	item.resolveSourceMapLocations = item.resolveSourceMapLocations or DEFAULT_RESOLVE_SOURCE_MAP_LOCATIONS
+	item.skipFiles = item.skipFiles or DEFAULT_SKIP_FILES
 	item.timeout = item.timeout or 30000
 	item.address = proxy.host
 	item.port = proxy.port
