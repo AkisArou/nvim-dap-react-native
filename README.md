@@ -9,21 +9,25 @@ React Native DevTools is the official supported debugger for React Native. This 
 This plugin handles VS Code-style `reactnativedirect` attach configurations from
 `dap.configurations` or `.vscode/launch.json`:
 
+Supported attach fields:
+
 ```jsonc
 {
   "type": "reactnativedirect",
   "request": "attach",
   "name": "Attach React Native Hermes",
-  "cwd": "${workspaceFolder}/apps/mobile",
+  "cwd": "${workspaceFolder}",
   "address": "127.0.0.1",
   "port": 8081,
   "sourceMaps": true,
   "sourceMapPathOverrides": {
-    "/[metro-project]/*": "${workspaceFolder}/apps/mobile/*",
+    "/[metro-project]/*": "${workspaceFolder}/*",
   },
   "skipFiles": ["<node_internals>/**", "node_modules/**"],
 }
 ```
+
+Defaults are `name = "Attach React Native Hermes"`, `cwd = "${workspaceFolder}"`, `address = "127.0.0.1"`, `port = 8081`, and `sourceMaps = true`. `sourceMapPathOverrides` and `skipFiles` are optional.
 
 ## Requirements
 
