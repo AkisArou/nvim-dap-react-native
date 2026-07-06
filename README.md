@@ -65,8 +65,6 @@ vim.api.nvim_create_autocmd("PackChanged", {
 vim.pack.add({
   { src = "https://github.com/AkisArou/nvim-dap-react-native" },
 })
-
-require("dap-react-native").setup()
 ```
 
 With lazy.nvim:
@@ -75,9 +73,6 @@ With lazy.nvim:
 {
   "AkisArou/nvim-dap-react-native",
   build = "npm ci",
-  config = function()
-    require("dap-react-native").setup()
-  end,
 }
 ```
 
@@ -89,6 +84,8 @@ Project-specific values belong in `dap.configurations` or `launch.json`. The plu
 
 ```lua
 local dap = require("dap")
+
+dap.adapters.reactnativedirect = require("dap-react-native").adapter
 
 for _, language in ipairs({
   "javascript",

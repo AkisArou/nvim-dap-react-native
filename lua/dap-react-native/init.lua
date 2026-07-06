@@ -2,7 +2,6 @@ local M = {}
 
 local DEFAULT_HOST = "127.0.0.1"
 local DEFAULT_PORT = 8081
-local DEFAULT_REACT_NATIVE_TYPE = "reactnativedirect"
 local DEFAULT_ADAPTER = "pwa-node"
 
 local DEFAULT_SKIP_FILES = {
@@ -23,9 +22,7 @@ local DEFAULT_RESOLVE_SOURCE_MAP_LOCATIONS = {
 local pending_thread_stop = setmetatable({}, { __mode = "k" })
 local active_proxies = {}
 local next_proxy_id = 0
-local setup_state = {
-	opts = nil,
-}
+local hooks_registered = false
 
 local PROXY_LOG_PREFIX = {
 	stdout = "dap-react-native proxy stdout: ",
@@ -69,9 +66,7 @@ end
 
 local function default_setup_options()
 	return {
-		react_native_type = DEFAULT_REACT_NATIVE_TYPE,
 		adapter = DEFAULT_ADAPTER,
-		setup_pause_stop_fix = true,
 		proxy = {
 			host = "127.0.0.1",
 			node_command = "node",
@@ -242,7 +237,7 @@ function M.filter_hermes_targets(targets)
 end
 
 function M.find_hermes_targets(config, opts)
-	opts = normalize_options(opts or setup_state.opts)
+	opts = normalize_options(opts)
 	local host, port = metro_endpoint(config or {}, opts)
 	local body = http_get(("http://%s:%s/json/list"):format(host, port))
 
@@ -590,7 +585,7 @@ local function merge_source_map_overrides(config, cwd)
 end
 
 function M.configure_launch_config(config, opts)
-	opts = normalize_options(opts or setup_state.opts)
+	opts = normalize_options(opts)
 
 	local item = vim.deepcopy(config)
 	local metro_config = vim.deepcopy(config)
@@ -628,21 +623,7 @@ function M.configure_launch_config(config, opts)
 	return item
 end
 
-function M.setup_launch_config_rewriter(opts)
-	opts = normalize_options(opts)
-	local dap = require("dap")
-
-	dap.listeners.on_config["dap_react_native"] = function(config)
-		if config.type == opts.react_native_type then
-			return M.configure_launch_config(config, opts)
-		end
-
-		return config
-	end
-end
-
-function M.setup_pause_stop_fix(opts)
-	opts = normalize_options(opts)
+function M.setup_pause_stop_fix()
 	local dap = require("dap")
 
 	dap.listeners.after.event_stopped["dap_react_native_pause_stop"] = function(session, stopped)
@@ -678,32 +659,74 @@ function M.setup_proxy_cleanup()
 	dap.listeners.before.event_exited["dap_react_native_proxy_cleanup"] = cleanup_session_proxy
 end
 
-function M.attach(config)
+local function ensure_hooks()
+	if hooks_registered then
+		return
+	end
+
+	M.setup_proxy_cleanup()
+	M.setup_pause_stop_fix()
+	hooks_registered = true
+end
+
+local function with_enriched_config(adapter, config, opts)
+	local item = vim.deepcopy(adapter)
+	local original_enrich_config = item.enrich_config
+
+	item.enrich_config = function(enrich_config, on_config)
+		local function configure(next_config)
+			on_config(M.configure_launch_config(next_config or config, opts))
+		end
+
+		if original_enrich_config then
+			original_enrich_config(enrich_config or config, configure)
+		else
+			configure(config)
+		end
+	end
+
+	return item
+end
+
+function M.adapter(callback, config, parent)
+	ensure_hooks()
+
 	local dap = require("dap")
-	local opts = normalize_options(setup_state.opts)
+	local opts = normalize_options()
+	local base_adapter = dap.adapters[opts.adapter]
+
+	if not base_adapter then
+		fail(
+			("`dap.adapters.%s` was not found. Configure vscode-js-debug as `%s` first."):format(
+				opts.adapter,
+				opts.adapter
+			)
+		)
+	end
+
+	if type(base_adapter) == "function" then
+		base_adapter(function(adapter)
+			callback(with_enriched_config(adapter, config, opts))
+		end, config, parent)
+		return
+	end
+
+	callback(with_enriched_config(base_adapter, config, opts))
+end
+
+function M.attach(config)
+	ensure_hooks()
+
+	local dap = require("dap")
 
 	config = vim.tbl_deep_extend("force", {
-		type = opts.react_native_type,
+		type = "reactnativedirect",
 		request = "attach",
 		name = "Attach React Native Hermes",
 		cwd = vim.fn.getcwd(),
 	}, config or {})
 
-	dap.run(M.configure_launch_config(config, opts))
-end
-
-function M.setup(opts)
-	opts = normalize_options(opts)
-	setup_state.opts = opts
-
-	M.setup_launch_config_rewriter(opts)
-	M.setup_proxy_cleanup()
-
-	if opts.setup_pause_stop_fix then
-		M.setup_pause_stop_fix(opts)
-	end
-
-	return M
+	dap.run(M.configure_launch_config(config))
 end
 
 return M
