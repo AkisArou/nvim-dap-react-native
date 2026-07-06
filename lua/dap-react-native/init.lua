@@ -2,7 +2,6 @@ local M = {}
 
 local DEFAULT_HOST = "127.0.0.1"
 local DEFAULT_PORT = 8081
-local DEFAULT_ADAPTER = "pwa-node"
 
 local DEFAULT_SKIP_FILES = {
 	"<node_internals>/**",
@@ -66,7 +65,6 @@ end
 
 local function default_setup_options()
 	return {
-		adapter = DEFAULT_ADAPTER,
 		proxy = {
 			host = "127.0.0.1",
 			node_command = "node",
@@ -601,7 +599,7 @@ function M.configure_launch_config(config, opts)
 	local cwd = item.cwd or "${workspaceFolder}"
 	local proxy = start_proxy(metro_config, opts)
 
-	item.type = opts.adapter or DEFAULT_ADAPTER
+	item.type = "pwa-node"
 	item.request = "attach"
 	item.__reactNativeHermes = true
 	item.__reactNativeHermesProxyId = register_proxy(proxy)
@@ -688,30 +686,25 @@ local function with_enriched_config(adapter, config, opts)
 	return item
 end
 
-function M.adapter(callback, config, parent)
-	ensure_hooks()
-
-	local dap = require("dap")
-	local opts = normalize_options()
-	local base_adapter = dap.adapters[opts.adapter]
-
-	if not base_adapter then
-		fail(
-			("`dap.adapters.%s` was not found. Configure vscode-js-debug as `%s` first."):format(
-				opts.adapter,
-				opts.adapter
-			)
-		)
+function M.create_adapter(base_adapter)
+	if type(base_adapter) ~= "table" and type(base_adapter) ~= "function" then
+		fail("create_adapter expects a vscode-js-debug nvim-dap adapter table or function.")
 	end
 
-	if type(base_adapter) == "function" then
-		base_adapter(function(adapter)
-			callback(with_enriched_config(adapter, config, opts))
-		end, config, parent)
-		return
-	end
+	return function(callback, config, parent)
+		ensure_hooks()
 
-	callback(with_enriched_config(base_adapter, config, opts))
+		local opts = normalize_options()
+
+		if type(base_adapter) == "function" then
+			base_adapter(function(adapter)
+				callback(with_enriched_config(adapter, config, opts))
+			end, config, parent)
+			return
+		end
+
+		callback(with_enriched_config(base_adapter, config, opts))
+	end
 end
 
 function M.attach(config)
