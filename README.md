@@ -6,7 +6,8 @@ React Native DevTools is the official supported debugger for React Native. This 
 
 ## What It Does
 
-This plugin handles VS Code-style `reactnativedirect` attach configurations:
+This plugin handles VS Code-style `reactnativedirect` attach configurations from
+`.vscode/launch.json` or `dap.configurations`:
 
 ```jsonc
 {
@@ -27,6 +28,8 @@ nvim-dap
 ```
 
 The proxy is used instead of connecting `vscode-js-debug` directly to Metro. It injects the websocket `Origin` header Metro expects and vendors the small Hermes CDP message handling used by `microsoft/vscode-react-native`.
+
+It does not configure your generic JavaScript debugging setup. Keep `vscode-js-debug`, browser attach configs, Node configs, and any `dap.ext.vscode` JSON parsing customizations in your normal `dap.lua`.
 
 ## Requirements
 
@@ -64,7 +67,7 @@ vim.opt.runtimepath:prepend(vim.fn.expand("~/Projects/nvim-dap-react-native"))
 require("dap-react-native").setup()
 ```
 
-Keep your generic JavaScript adapter setup outside this plugin. This plugin expects `pwa-node` to already exist, for example through `vscode-js-debug` / Mason / your existing `dap.lua`.
+Keep your generic JavaScript adapter setup outside this plugin. This plugin expects `pwa-node` to already exist when you start the session, for example through `vscode-js-debug` / Mason / your existing `dap.lua`.
 
 For React Native Hermes attach, only `pwa-node` is required. Configure `pwa-chrome` separately only if you also debug browser apps.
 
@@ -83,10 +86,17 @@ require("dap-react-native").setup({
   proxy = {
     host = "127.0.0.1",
     node_command = "node",
+    script_path = "<plugin>/scripts/react-native-hermes-cdp-proxy.js",
     log = false,
+    start_timeout_ms = 5000,
   },
 
   source_maps = true,
+  resolve_source_map_locations = {
+    "**",
+    "!**/node_modules/!(expo)/**",
+  },
+  setup_pause_stop_fix = true,
 
   skip_files = {
     "<node_internals>/**",
@@ -102,9 +112,11 @@ require("dap-react-native").setup({
 
 Per-configuration `address` and `port` are treated like upstream `reactnativedirect` options and override the Metro host/port for that debug config.
 
+The plugin also honors `REACT_NATIVE_PACKAGER_HOSTNAME` and `RCT_METRO_PORT` when no host or port is set in the debug config or setup options.
+
 ## Launch JSON
 
-Use your normal `dap.ext.vscode` flow:
+Use your normal `dap.ext.vscode` flow. Current `nvim-dap` reads `.vscode/launch.json` automatically on demand, so `dap.ext.vscode.load_launchjs()` and `type_to_filetypes` mappings are not needed for this plugin.
 
 ```jsonc
 {
@@ -116,6 +128,29 @@ Use your normal `dap.ext.vscode` flow:
 ```
 
 `request = "launch"` is intentionally not implemented yet. Start Metro and the app yourself, then attach.
+
+If you do not want to use `launch.json`, define the same configuration in `dap.configurations`:
+
+```lua
+require("dap").configurations.typescriptreact = {
+  {
+    type = "reactnativedirect",
+    request = "attach",
+    name = "React Native: Attach Hermes",
+    cwd = "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
+  },
+}
+```
+
+For a keymap or command, you can also bypass configuration selection:
+
+```lua
+vim.keymap.set("n", "<leader>dn", function()
+  require("dap-react-native").attach({
+    cwd = vim.fn.getcwd(),
+  })
+end)
+```
 
 ## Notes
 
