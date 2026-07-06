@@ -85,9 +85,18 @@ Project-specific values belong in `dap.configurations` or `launch.json`. The plu
 ```lua
 local dap = require("dap")
 
--- Pass the same vscode-js-debug adapter definition you use for pwa-node.
-dap.adapters.reactnativedirect =
-  require("dap-react-native").create_adapter(js_debug_adapter_opts)
+dap.adapters.reactnativedirect = require("dap-react-native").create_adapter({
+  type = "server",
+  host = "localhost",
+  port = "${port}",
+  executable = {
+    command = "node",
+    args = {
+      "/path/to/js-debug/src/dapDebugServer.js",
+      "${port}",
+    },
+  },
+})
 
 for _, language in ipairs({
   "javascript",
