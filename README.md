@@ -9,7 +9,7 @@ React Native DevTools is the official supported debugger for React Native. This 
 This plugin handles VS Code-style `reactnativedirect` attach configurations from
 `dap.configurations` or `.vscode/launch.json`:
 
-Supported attach fields:
+Full supported attach schema:
 
 ```jsonc
 {
@@ -23,11 +23,19 @@ Supported attach fields:
   "sourceMapPathOverrides": {
     "/[metro-project]/*": "${workspaceFolder}/*",
   },
-  "skipFiles": ["<node_internals>/**", "node_modules/**"],
+  "skipFiles": [
+    "<node_internals>/**",
+    "node_modules/**",
+    "**/node_modules/undici/**",
+    "**/node_modules/typescript/**",
+    "**/node_modules/@expo/**",
+    "**/*.bundle.js",
+    "**/*.min.js",
+  ],
 }
 ```
 
-Defaults are `name = "Attach React Native Hermes"`, `cwd = "${workspaceFolder}"`, `address = "127.0.0.1"`, `port = 8081`, and `sourceMaps = true`. `sourceMapPathOverrides` and `skipFiles` are optional.
+Defaults are the values shown above. `sourceMapPathOverrides` and `skipFiles` are optional.
 
 Related VS Code React Native Tools docs:
 
@@ -75,7 +83,7 @@ With lazy.nvim:
 
 ## Setup
 
-Configure `pwa-node` in your normal DAP setup before using this plugin. `pwa-chrome` is not required for React Native.
+Configure `pwa-node` in your normal DAP setup before using this plugin.
 
 Most users only need:
 
@@ -103,21 +111,12 @@ for _, language in ipairs({
     type = "reactnativedirect",
     request = "attach",
     name = "React Native: Attach Hermes",
-    cwd = "${workspaceFolder}/apps/mobile",
+    cwd = "${workspaceFolder}",
   })
 end
 ```
 
-The same config can live in `.vscode/launch.json` if you prefer to reuse VS Code-style project config:
-
-```jsonc
-{
-  "type": "reactnativedirect",
-  "request": "attach",
-  "name": "React Native: Attach Hermes",
-  "cwd": "${workspaceFolder}/apps/mobile",
-}
-```
+The same JSON shape can live in `.vscode/launch.json` if you prefer to reuse VS Code-style project config.
 
 `request = "launch"` is intentionally not implemented yet. Start Metro and the app yourself, then attach.
 
