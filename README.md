@@ -18,19 +18,6 @@ This plugin handles VS Code-style `reactnativedirect` attach configurations from
 }
 ```
 
-Internally it runs:
-
-```text
-nvim-dap
-  -> vscode-js-debug pwa-node
-  -> local Hermes CDP proxy
-  -> Metro / React Native Hermes websocket
-```
-
-The proxy is used instead of connecting `vscode-js-debug` directly to Metro. It injects the websocket `Origin` header Metro expects and vendors the small Hermes CDP message handling used by `microsoft/vscode-react-native`.
-
-It does not configure your generic JavaScript debugging setup. Keep `vscode-js-debug`, browser attach configs, Node configs, and any `dap.ext.vscode` JSON parsing customizations in your normal `dap.lua`.
-
 ## Requirements
 
 - Neovim with `nvim-dap`
